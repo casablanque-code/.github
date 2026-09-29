@@ -1,14 +1,17 @@
 # Contributing
 
-Спасибо за интерес к проекту.
+Thanks for your interest in the project.
 
-1. Форкни репозиторий и создай ветку от `main`: `feat/short-description` или `fix/short-description`.
-2. Убедись, что `make lint` и `make test` (или их аналоги для стека) проходят локально.
-3. Коммиты — в стиле [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`...).
-4. Открой Pull Request, заполни шаблон, дождись прохождения CI.
-5. Один одобренный ревью — обязательное условие мержа.
+1. Fork the repo and create a branch off `main`: `feat/short-description` or
+   `fix/short-description`.
+2. Make sure `make lint` and `make test` (or the equivalent for the stack)
+   pass locally.
+3. Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
+   (`feat:`, `fix:`, `chore:`, `docs:`...).
+4. Open a Pull Request, fill in the template, wait for CI to pass.
+5. One approving review is required before merge.
 
-## Локальная разработка
+## Local development
 
-Смотри `README.md` конкретного репозитория — там команды `make`/`just`/`npm run` для сборки,
-тестов и линтинга.
+See the specific repository's `README.md` for the `make`/`just`/`npm run`
+commands used for building, testing, and linting.

@@ -1,11 +1,12 @@
 # Code of Conduct
 
-Этот проект придерживается упрощённой версии [Contributor Covenant](https://www.contributor-covenant.org/):
+This project follows a lightweight version of the
+[Contributor Covenant](https://www.contributor-covenant.org/):
 
-- Будьте уважительны к другим участникам.
-- Конструктивная критика — да, личные нападки — нет.
-- Нарушения можно сообщить через Issues (для несерьёзных случаев) или напрямую мейнтейнеру
-  (для серьёзных, см. SECURITY.md для контакта).
+- Be respectful of other contributors.
+- Constructive criticism is welcome, personal attacks are not.
+- Violations can be reported via Issues (for minor cases) or directly to the
+  maintainer (for serious cases, see SECURITY.md for contact details).
 
-Мейнтейнер оставляет за собой право удалять комментарии, коммиты, код, issues и другой
-вклад, не соответствующий этому кодексу.
+The maintainer reserves the right to remove comments, commits, code, issues,
+and other contributions that don't align with this code.

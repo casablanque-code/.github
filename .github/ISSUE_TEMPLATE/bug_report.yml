@@ -1,18 +1,18 @@
 name: Bug report
-description: Сообщить о проблеме
+description: Report a problem
 labels: ["bug"]
 body:
   - type: textarea
     id: description
     attributes:
-      label: Описание проблемы
-      description: Что произошло? Что ожидалось?
+      label: Description
+      description: What happened? What did you expect?
     validations:
       required: true
   - type: textarea
     id: repro
     attributes:
-      label: Шаги воспроизведения
+      label: Steps to reproduce
       placeholder: |
         1.
         2.
@@ -22,13 +22,13 @@ body:
   - type: input
     id: version
     attributes:
-      label: Версия / коммит
+      label: Version / commit
     validations:
       required: false
   - type: textarea
     id: env
     attributes:
-      label: Окружение
-      description: ОС, версия языка/рантайма и т.п.
+      label: Environment
+      description: OS, language/runtime version, etc.
     validations:
       required: false

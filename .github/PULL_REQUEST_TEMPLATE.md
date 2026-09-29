@@ -1,14 +1,14 @@
-## Что сделано
+## What changed
 
-<!-- Кратко: что и зачем -->
+<!-- Briefly: what and why -->
 
-## Как проверить
+## How to test
 
-<!-- Шаги для ревьюера -->
+<!-- Steps for the reviewer -->
 
-## Чеклист
+## Checklist
 
-- [ ] `make lint` / `npm run lint` проходит
-- [ ] `make test` / `npm test` проходит
-- [ ] Обновлена документация (если нужно)
-- [ ] Коммиты соответствуют Conventional Commits
+- [ ] `make lint` / `npm run lint` passes
+- [ ] `make test` / `npm test` passes
+- [ ] Documentation updated (if needed)
+- [ ] Commits follow Conventional Commits
