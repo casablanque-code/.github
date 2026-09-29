@@ -1,0 +1,34 @@
+name: Bug report
+description: Сообщить о проблеме
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Описание проблемы
+      description: Что произошло? Что ожидалось?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Шаги воспроизведения
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия / коммит
+    validations:
+      required: false
+  - type: textarea
+    id: env
+    attributes:
+      label: Окружение
+      description: ОС, версия языка/рантайма и т.п.
+    validations:
+      required: false
