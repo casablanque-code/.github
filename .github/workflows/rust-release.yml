@@ -1,0 +1,99 @@
+name: rust-release
+
+# Reusable: builds release binaries for 5 targets, attaches archives + sha256
+# checksums to a GitHub Release. The release is created as a draft first and
+# published only after every binary is uploaded.
+
+on:
+  workflow_call:
+    inputs:
+      bin:
+        description: "Binary name (Cargo bin target)."
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: tag matches Cargo.toml and sits on the default branch
+        env:
+          TAG: ${{ github.ref_name }}
+          BIN: ${{ inputs.bin }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::tag '$TAG' is not vX.Y.Z[-suffix]"; exit 1
+          fi
+          git fetch --no-tags origin "$DEFAULT_BRANCH"
+          git merge-base --is-ancestor "$GITHUB_SHA" "origin/$DEFAULT_BRANCH" \
+            || { echo "::error::$TAG is not on $DEFAULT_BRANCH"; exit 1; }
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r --arg b "$BIN" '[.packages[] | select(.targets[].name == $b)][0].version')
+          if [[ "v$version" != "$TAG" ]]; then
+            echo "::error::tag $TAG != Cargo.toml version v$version (bump Cargo.toml first)"; exit 1
+          fi
+
+      - name: create draft release
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          args=(--verify-tag --generate-notes --title "$TAG" --draft)
+          [[ "$TAG" == *-* ]] && args+=(--prerelease)
+          gh release create "$TAG" "${args[@]}"
+
+  binaries:
+    needs: [prepare]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu }
+          - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-gnu }
+          - { os: macos-latest, target: aarch64-apple-darwin }
+          - { os: macos-latest, target: x86_64-apple-darwin }
+          - { os: windows-latest, target: x86_64-pc-windows-msvc }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: taiki-e/upload-rust-binary-action@f0d45ae91ee7b8ee928de7a9d04d893a08bcbec6 # v1
+        with:
+          bin: ${{ inputs.bin }}
+          target: ${{ matrix.target }}
+          archive: $bin-$tag-$target
+          tar: unix
+          zip: windows
+          checksum: sha256
+          token: ${{ github.token }}
+
+  publish:
+    needs: [binaries]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: publish release
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "$TAG" --draft=false

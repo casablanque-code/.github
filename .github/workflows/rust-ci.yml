@@ -1,0 +1,143 @@
+name: rust-ci
+
+on:
+  workflow_call:
+    inputs:
+      rust-toolchain:
+        type: string
+        default: "stable"
+      working-directory:
+        type: string
+        default: "."
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: install toolchain
+        env:
+          TOOLCHAIN: ${{ inputs.rust-toolchain }}
+        run: |
+          rustup toolchain install "$TOOLCHAIN" --profile minimal --component rustfmt --no-self-update
+          rustup default "$TOOLCHAIN"
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: install toolchain
+        env:
+          TOOLCHAIN: ${{ inputs.rust-toolchain }}
+        run: |
+          rustup toolchain install "$TOOLCHAIN" --profile minimal --component clippy --no-self-update
+          rustup default "$TOOLCHAIN"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: ${{ inputs.working-directory }}
+
+      - name: cargo clippy
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: install toolchain
+        env:
+          TOOLCHAIN: ${{ inputs.rust-toolchain }}
+        run: |
+          rustup toolchain install "$TOOLCHAIN" --profile minimal --component llvm-tools-preview --no-self-update
+          rustup default "$TOOLCHAIN"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: ${{ inputs.working-directory }}
+
+      - uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2
+        with:
+          tool: cargo-llvm-cov
+
+      - name: cargo test with coverage
+        run: cargo llvm-cov --locked --all-features --workspace --lcov --output-path lcov.info
+
+      - name: doc tests
+        run: cargo test --locked --doc --all-features
+
+      - name: upload coverage
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
+        with:
+          files: ${{ inputs.working-directory }}/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: install toolchain
+        env:
+          TOOLCHAIN: ${{ inputs.rust-toolchain }}
+        run: |
+          rustup toolchain install "$TOOLCHAIN" --profile minimal --no-self-update
+          rustup default "$TOOLCHAIN"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: ${{ inputs.working-directory }}
+
+      - name: cargo build --release
+        run: cargo build --locked --release
+
+  ci-ok:
+    if: always()
+    needs: [fmt, clippy, test, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: all jobs succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: jq -e 'all(.[]; .result == "success")' <<<"$NEEDS"

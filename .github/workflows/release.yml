@@ -1,0 +1,62 @@
+name: release
+
+# Generic reusable release: validates the tag and creates a GitHub Release
+# with auto-generated notes. Call it from a workflow triggered by `v*.*.*` tags.
+# Language-specific publishing (crates.io / npm / goreleaser) lives in the caller.
+
+on:
+  workflow_call:
+    inputs:
+      draft:
+        type: boolean
+        default: false
+      prerelease:
+        description: "Force prerelease. Tags with a suffix (v1.2.3-rc.1) are always prereleases."
+        type: boolean
+        default: false
+    outputs:
+      tag:
+        value: ${{ jobs.github-release.outputs.tag }}
+
+permissions: {}
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: tag must be vX.Y.Z[-suffix] and sit on the default branch
+        env:
+          TAG: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::tag '$TAG' is not vX.Y.Z[-suffix]"; exit 1
+          fi
+          git fetch --no-tags origin "$DEFAULT_BRANCH"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/$DEFAULT_BRANCH"; then
+            echo "::error::$TAG is not on $DEFAULT_BRANCH — release from the default branch only"; exit 1
+          fi
+
+      - name: create GitHub Release
+        env:
+          TAG: ${{ github.ref_name }}
+          DRAFT: ${{ inputs.draft }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          args=(--verify-tag --generate-notes --title "$TAG")
+          [[ "$DRAFT" == "true" ]] && args+=(--draft)
+          if [[ "$PRERELEASE" == "true" || "$TAG" == *-* ]]; then args+=(--prerelease); fi
+          gh release create "$TAG" "${args[@]}"
