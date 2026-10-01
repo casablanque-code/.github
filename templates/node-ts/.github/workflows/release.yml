@@ -1,0 +1,66 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: tag matches package.json version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [[ "v$version" != "$TAG" ]]; then
+            echo "::error::tag $TAG != package.json version v$version (run: npm version <x.y.z> --no-git-tag-version)"
+            exit 1
+          fi
+
+  ci:
+    needs: [verify]
+    permissions:
+      contents: read
+    uses: casablanque-code/.github/.github/workflows/node-ci.yml@v1
+
+  github-release:
+    needs: [ci]
+    permissions:
+      contents: write
+    uses: casablanque-code/.github/.github/workflows/release.yml@v1
+
+  # Enable when ready to publish to npm. Uses trusted publishing (OIDC): configure
+  # the package's "Trusted Publisher" on npmjs.com for this repo + workflow file
+  # `release.yml`; no NPM_TOKEN secret is needed and provenance is attached.
+  #
+  # npm-publish:
+  #   needs: [github-release]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/checkout@v7
+  #       with:
+  #         persist-credentials: false
+  #     - uses: actions/setup-node@v7
+  #       with:
+  #         node-version: "24"
+  #         registry-url: "https://registry.npmjs.org"
+  #         cache: npm
+  #     - run: npm ci
+  #     - run: npm run build
+  #     - run: npm publish --access public

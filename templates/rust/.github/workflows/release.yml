@@ -1,0 +1,47 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions: {}
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: casablanque-code/.github/.github/workflows/rust-ci.yml@v1
+
+  # Verifies tag == Cargo.toml version, builds linux/macos/windows binaries
+  # (x86_64 + aarch64), attaches archives + sha256 sums and publishes the release.
+  # Assumes the binary is named like the repo; override `bin` otherwise.
+  release:
+    needs: [ci]
+    permissions:
+      contents: write
+    uses: casablanque-code/.github/.github/workflows/rust-release.yml@v1
+    with:
+      bin: ${{ github.event.repository.name }}
+
+  # Enable when ready to publish to crates.io. Uses trusted publishing (OIDC):
+  # add this repo + workflow file `release.yml` as a Trusted Publisher on crates.io
+  # (the first version of a crate must be published manually with a token).
+  #
+  # cargo-publish:
+  #   needs: [release]
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 15
+  #   permissions:
+  #     contents: read
+  #     id-token: write
+  #   steps:
+  #     - uses: actions/checkout@v7
+  #       with:
+  #         persist-credentials: false
+  #     - uses: rust-lang/crates-io-auth-action@v1
+  #       id: auth
+  #     - run: cargo publish --locked
+  #       env:
+  #         CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

@@ -1,0 +1,23 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions: {}
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: casablanque-code/.github/.github/workflows/go-ci.yml@v1
+
+  # GoReleaser: cross-compiled archives + checksums.txt + GitHub Release
+  # (prerelease auto-detected from the tag suffix). Config: .goreleaser.yaml
+  release:
+    needs: [ci]
+    permissions:
+      contents: write
+    uses: casablanque-code/.github/.github/workflows/go-release.yml@v1

@@ -49,3 +49,19 @@ Settings can be re-applied to any existing repository:
 
 `optional/dependabot-auto-merge.yml` — auto-merge for Dependabot patch/minor PRs.
 Copy it to `.github/workflows/` of a project if you want it.
+
+## Releasing a project
+
+Releases are cut from `main` by pushing a `vX.Y.Z` tag (`vX.Y.Z-rc.1` makes a prerelease).
+
+```bash
+# Go
+git tag v0.2.0 && git push origin v0.2.0
+# Rust: bump `version` in Cargo.toml and commit first — the tag must equal it
+git tag v0.2.0 && git push origin main v0.2.0
+# Node
+npm version minor && git push origin main --follow-tags
+```
+
+Rust/Go projects get binaries for linux/macos/windows with checksums attached; publishing to
+crates.io / npm is prepared (commented out, trusted publishing) in each `release.yml`.

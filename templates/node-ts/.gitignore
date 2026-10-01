@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
