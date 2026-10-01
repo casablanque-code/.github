@@ -1,0 +1,37 @@
+name: dependabot-auto-merge
+
+# Enables auto-merge for Dependabot patch/minor PRs. GitHub merges them only
+# after the required checks pass (branch protection: `ci / ci-ok`).
+# Major updates are left for a human. No PR code is ever checked out here.
+
+on: pull_request_target
+
+permissions: {}
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - id: metadata
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2
+        with:
+          github-token: ${{ github.token }}
+
+      - name: enable auto-merge (patch/minor)
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr merge --auto --squash "$PR_URL"
+
+      - name: flag major update for manual review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "$PR_URL" --body "Major update - review manually before merging."

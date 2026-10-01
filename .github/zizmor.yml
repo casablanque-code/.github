@@ -1,0 +1,6 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Own reusable workflows are pinned by tag (v1), everything else by SHA.
+        casablanque-code/*: ref-pin

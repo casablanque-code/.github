@@ -1,0 +1,16 @@
+[package]
+name = "__NAME__"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "__DESC__"
+repository = "https://github.com/casablanque-code/__NAME__"
+readme = "README.md"
+
+[dependencies]
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
