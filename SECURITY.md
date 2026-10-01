@@ -2,14 +2,23 @@
 
 ## Supported Versions
 
-Only the latest major version of each project is supported, unless stated
-otherwise in that repository's README.
+Only the latest release receives security fixes.
+
+| Version | Supported |
+|---------|-----------|
+| x.x.x   | ✅        |
+| < x.x   | ❌        |
+
 
 ## Reporting a Vulnerability
 
-Please do not open a public Issue for security vulnerabilities.
-Instead, use the **Security → Report a vulnerability** tab (GitHub Private
-Vulnerability Reporting) on the relevant repository, or email [add your
-email/contact here] directly.
+**Please do not open a public GitHub issue for security vulnerabilities.**
 
-Expect a response within 7 days.
+Email: casablanque@proton.me  
+Response time: within 72 hours
+
+Include in your report:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix (if any)
