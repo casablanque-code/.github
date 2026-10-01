@@ -1,17 +1,58 @@
 # Contributing
 
-Thanks for your interest in the project.
+## Getting started
 
-1. Fork the repo and create a branch off `main`: `feat/short-description` or
-   `fix/short-description`.
-2. Make sure `make lint` and `make test` (or the equivalent for the stack)
-   pass locally.
-3. Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
-   (`feat:`, `fix:`, `chore:`, `docs:`...).
-4. Open a Pull Request, fill in the template, wait for CI to pass.
-5. One approving review is required before merge.
+* Fork the repo
+* Clone it
+* Make your changes
+* Open a PR
 
-## Local development
+## What makes a good contribution
 
-See the specific repository's `README.md` for the `make`/`just`/`npm run`
-commands used for building, testing, and linting.
+* Removes complexity, not adds it
+* Keeps behavior deterministic
+* Avoids hidden state and magic
+* Works in both local and CI environments
+
+If your change makes the system harder to reason about - it will likely be rejected.
+
+## Code style
+
+No strict rules, but:
+
+* Keep it readable
+* Prefer explicit over clever
+* Avoid unnecessary abstractions
+* Small, focused changes > big rewrites
+
+## Issues
+
+If something is broken or unclear:
+
+* Describe what you did
+* What you expected
+* What actually happened
+
+Logs and configs help. Screenshots don’t.
+
+## Pull Requests
+
+Before opening a PR:
+
+* Make sure it builds
+* Keep changes scoped
+* Explain *why* the change is needed
+
+PRs without context are hard to review.
+
+## Discussions
+
+Use Discussions for:
+
+* ideas
+* architecture questions
+* trade-offs
+
+Issues are for bugs. Discussions are for thinking.
+
+Cheers!
