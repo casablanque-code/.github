@@ -4,12 +4,6 @@
 
 Only the latest release receives security fixes.
 
-| Version | Supported |
-|---------|-----------|
-| x.x.x   | ✅        |
-| < x.x   | ❌        |
-
-
 ## Reporting a Vulnerability
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
